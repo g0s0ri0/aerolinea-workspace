@@ -1,0 +1,42 @@
+version: '3.8'
+services:
+  mysql:
+    image: mysql:8.0
+    environment:
+      MYSQL_ROOT_PASSWORD: microservices
+      MYSQL_DATABASE: microservices_db
+    ports:
+      - "3306:3306"
+    volumes:
+      - mysql_data:/var/lib/mysql
+
+  redis:
+    image: redis:7.0-alpine
+    ports:
+      - "6379:6379"
+
+  ms-flights:
+    build: ./ms-flights
+    ports:
+      - "5501:5501"
+    environment:
+      - PORT=5501
+      - MYSQL_HOST=mysql
+      - MYSQL_USER=root
+      - MYSQL_PASSWORD=microservices
+      - MYSQL_DATABASE=microservices_db
+    depends_on:
+      - mysql
+
+  ms-reservations:
+    build: ./ms-reservations
+    ports:
+      - "7701:8000"
+    environment:
+      - REDIS_HOST=redis
+      - REDIS_PORT=6379
+    depends_on:
+      - redis
+
+volumes:
+  mysql_data:
