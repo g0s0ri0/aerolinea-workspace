@@ -16,6 +16,8 @@ services:
 
   ms-flights:
     build: ./ms-flights
+    volumes:
+      - ./ms-flights:/opt/app
     ports:
       - "5501:5501"
     environment:
