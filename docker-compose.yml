@@ -1,4 +1,3 @@
-version: '3.8'
 services:
   mysql:
     image: mysql:8.0
@@ -30,6 +29,8 @@ services:
 
   ms-reservations:
     build: ./ms-reservations
+    volumes:
+      - ./ms-reservations:/app
     ports:
       - "7701:8000"
     environment:
