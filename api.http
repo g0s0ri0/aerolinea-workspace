@@ -1,0 +1,18 @@
+### 1. Health check de reservas (Python)
+GET http://localhost:7701/health
+
+### 2. Crear una reserva (Python)
+PUT http://localhost:7701/reservations
+Content-Type: application/json
+
+{
+  "seat_num": "14A",
+  "flight_id": "AA2532",
+  "customer_id": "user-999"
+}
+
+### 3. Consultar reservas (Python)
+GET http://localhost:7701/reservations?flight_id=AA2532
+
+### 4. Buscar vuelo (Node.js)
+GET http://localhost:5501/flights?flight_no=AA2532

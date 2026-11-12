@@ -41,5 +41,18 @@ services:
     depends_on:
       - redis
 
+
+  traefik:
+    image: traefik:v3.7  # o la versión que estés usando
+    command:
+      - "--api.insecure=true"           # Habilita el dashboard en modo desarrollo
+      - "--providers.docker=true"       # Permite a Traefik descubrir contenedores
+      - "--entrypoints.web.address=:80" # Punto de entrada para el tráfico web
+    ports:
+      - "80:80"       # Puerto para el tráfico de tus microservicios
+      - "8080:8080"   # Puerto para el Dashboard
+    volumes:
+      - "/var/run/docker.sock:/var/run/docker.sock" # Descubrimiento de contenedores    
+
 volumes:
   mysql_data:
