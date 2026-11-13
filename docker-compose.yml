@@ -1,4 +1,19 @@
 services:
+  # 1. El Enrutador de Borde
+  traefik:
+    image: traefik:v3.6
+    command:
+      - "--api.insecure=true"
+      - "--providers.docker=true"
+      - "--providers.docker.exposedbydefault=false"
+      - "--entrypoints.web.address=:80"   # <--- AGREGAR ESTA LÍNEA
+    ports:
+      - "8081:8080" # Puerto del Dashboard
+      - "9080:80"   # Puerto de entrada para los microservicios
+    volumes:
+      - "/var/run/docker.sock:/var/run/docker.sock:ro"
+
+  # 2. Base de Datos MySQL
   mysql:
     image: mysql:8.0
     environment:
@@ -9,17 +24,18 @@ services:
     volumes:
       - mysql_data:/var/lib/mysql
 
+  # 3. Base de Datos Redis
   redis:
     image: redis:7.0-alpine
     ports:
       - "6379:6379"
 
+  # 4. Microservicio Node.js
   ms-flights:
     build: ./ms-flights
     volumes:
       - ./ms-flights:/opt/app
-    ports:
-      - "5501:5501"
+      - /opt/app/node_modules
     environment:
       - PORT=5501
       - MYSQL_HOST=mysql
@@ -28,31 +44,27 @@ services:
       - MYSQL_DATABASE=microservices_db
     depends_on:
       - mysql
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.routers.ms-flights.rule=PathPrefix(`/flights`)"
+      - "traefik.http.routers.ms-flights.entrypoints=web"
+      - "traefik.http.services.ms-flights.loadbalancer.server.port=5501" # <--- El puerto interno de Node
 
+  # 5. Microservicio Python
   ms-reservations:
     build: ./ms-reservations
     volumes:
       - ./ms-reservations:/app
-    ports:
-      - "7701:8000"
     environment:
       - REDIS_HOST=redis
       - REDIS_PORT=6379
     depends_on:
       - redis
-
-
-  traefik:
-    image: traefik:v3.7  # o la versión que estés usando
-    command:
-      - "--api.insecure=true"           # Habilita el dashboard en modo desarrollo
-      - "--providers.docker=true"       # Permite a Traefik descubrir contenedores
-      - "--entrypoints.web.address=:80" # Punto de entrada para el tráfico web
-    ports:
-      - "80:80"       # Puerto para el tráfico de tus microservicios
-      - "8080:8080"   # Puerto para el Dashboard
-    volumes:
-      - "/var/run/docker.sock:/var/run/docker.sock" # Descubrimiento de contenedores    
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.routers.ms-reservations.rule=PathPrefix(`/reservations`)"
+      - "traefik.http.routers.ms-reservations.entrypoints=web"
+      - "traefik.http.services.ms-reservations.loadbalancer.server.port=8000" # <--- El puerto interno de Python
 
 volumes:
   mysql_data:
