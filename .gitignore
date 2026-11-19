@@ -1,2 +1,6 @@
 ms-flights/
 ms-reservations/
+ms-flights/
+ms-reservations/
+ms-payments/
+*.http
