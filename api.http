@@ -16,3 +16,34 @@ GET http://localhost:7701/reservations?flight_id=AA2532
 
 ### 4. Buscar vuelo (Node.js)
 GET http://localhost:5501/flights?flight_no=AA2532
+
+
+#######
+
+### 1. Health check de reservas (Python a través de Traefik)
+GET http://localhost:9080/reservations/health
+
+### 2. Crear una reserva (Python a través de Traefik)
+PUT http://localhost:9080/reservations
+Content-Type: application/json
+
+{
+  "seat_num": "14A",
+  "flight_id": "AA2532",
+  "customer_id": "user-999"
+}
+
+### 3. Consultar reservas (Python a través de Traefik)
+GET http://localhost:9080/reservations?flight_id=AA2532
+
+### 4. Buscar vuelo (Node.js a través de Traefik)
+GET http://localhost:9080/flights?flight_no=AA2532
+
+### 5. Probar Pagos (Go a través de Traefik)
+POST http://localhost:9080/payments
+Content-Type: application/json
+
+{
+  "reservation_id": "res-999",
+  "amount": 250.50
+}

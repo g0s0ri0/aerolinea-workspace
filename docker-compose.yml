@@ -23,6 +23,7 @@ services:
       - "3306:3306"
     volumes:
       - mysql_data:/var/lib/mysql
+      - ./mysql-init:/docker-entrypoint-initdb.d
 
   # 3. Base de Datos Redis
   redis:
@@ -52,6 +53,8 @@ services:
       - "traefik.http.routers.ms-flights.rule=PathPrefix(`/flights`)"
       - "traefik.http.routers.ms-flights.entrypoints=web"
       - "traefik.http.services.ms-flights.loadbalancer.server.port=5501" # <--- El puerto interno de Node
+      - "traefik.http.routers.ms-flights.middlewares=strip-flights"
+      - "traefik.http.middlewares.strip-flights.stripprefix.prefixes=/flights"
 
   # 5. Microservicio Python
   ms-reservations:
@@ -72,3 +75,4 @@ services:
 volumes:
   mysql_data:
   redis_data:                           # <--- Declaración del nuevo volumen
+
